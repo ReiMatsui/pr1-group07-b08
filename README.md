@@ -59,7 +59,8 @@ git clone https://github.com/flutter/flutter.git -b stable
 ```
 * pathを通す
 ```
-export PATH="$PATH:`pwd`/flutter/bin"
+echo 'export PATH="$PATH:$HOME/flutter/bin"' >> ~/.zshrc
+source ~/.zshrc
 ```
 
 1. ディレクトリ移動
