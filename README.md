@@ -53,6 +53,15 @@ poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ### 💻 フロントエンド（Flutter）
 
+0. flutterのインストール
+```
+git clone https://github.com/flutter/flutter.git -b stable
+```
+* pathを通す
+```
+export PATH="$PATH:`pwd`/flutter/bin"
+```
+
 1. ディレクトリ移動
 ```
 cd frontend
