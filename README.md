@@ -92,7 +92,7 @@ poretry add <library_name>
 ```
 
 ### gitの運用
-1. Branchを切る
+1. ``develop``ブランチからBranchを切る
 ```
 feat/your_name/function
 ex: feat/matsui/create_environment
