@@ -8,6 +8,12 @@ authors = ["ReiMatsui <rei0203@icloud.com>"]
 python = "^3.11"
 fastapi = "^0.115.12"
 uvicorn = "^0.34.1"
+sqlalchemy = "^2.0.40"
+aiosqlite = "^0.21.0"
+pydantic = {extras = ["email"], version = "^2.11.3"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+email-validator = "^2.2.0"
+bcrypt = "3.2.2"
 
 
 [build-system]
