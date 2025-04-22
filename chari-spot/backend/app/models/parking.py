@@ -10,7 +10,7 @@ class Parking(Base):
     address = Column(String, nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    available_slots = Column(Integer, nullable=False)
     total_slots = Column(Integer, nullable=False)
+    available_slots = Column(Integer, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 

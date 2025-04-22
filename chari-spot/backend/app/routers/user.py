@@ -7,7 +7,7 @@ from app.models import user as models
 
 router = APIRouter()
 
-@router.post("/register", response_model=schemas.UserResponse)
+@router.post("/user/register", response_model=schemas.UserResponse)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Check if the email is already registered
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -16,3 +16,15 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     return crud.create_user(db=db, user=user)
 
+@router.post("/user/get/{id}", response_model=schemas.UserResponse)
+def update_user(id: int, db: Session = Depends(get_db)):
+    return crud.get_user(db, id)
+
+
+@router.post("/user/update", response_model=schemas.UserResponse)
+def update_user(user: schemas.UserUpdate, db: Session = Depends(get_db)):
+    return crud.update_user(db, user)
+
+@router.post("/user/delete/{id}")
+def update_user(id: int, db: Session = Depends(get_db)):
+    return crud.delete_user(db, id)

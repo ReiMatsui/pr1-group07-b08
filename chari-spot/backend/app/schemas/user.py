@@ -6,6 +6,12 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str  # 用户提交的明文密码
 
+class UserUpdate(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    password: str
+
 # 注册成功后返回的响应体
 class UserResponse(BaseModel):
     id: int
