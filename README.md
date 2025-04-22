@@ -1,6 +1,7 @@
 # pr1-group07-b08
 Practice of Infomation Systemsの7班のプロジェクトです．
 
+---
 
 # Chari Spot App
 
@@ -9,7 +10,7 @@ Practice of Infomation Systemsの7班のプロジェクトです．
 
 ---
 
-## 🧰 前提条件
+## 前提条件
 
 - Python 3.10+
 - Poetry 1.8+
@@ -18,10 +19,10 @@ Practice of Infomation Systemsの7班のプロジェクトです．
 
 ---
 
-## 🚀 セットアップ手順
+## セットアップ手順
 
 
-### 📦 バックエンド（FastAPI + Poetry）
+### バックエンド（FastAPI + Poetry）
 
 0. Poetryのダウンロード（なければ）
 ```
@@ -51,7 +52,7 @@ poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 * Swagger UI: http://localhost:8000/docs
 
-### 💻 フロントエンド（Flutter）
+### フロントエンド（Flutter）
 
 0. flutterのインストール
 ```
@@ -81,3 +82,21 @@ flutter run
 4. 動作確認
 * バックエンドの3を行い，APIが起動していることを確認してください．
 * アプリ画面に`Hello from FastAPI!`と表示されれば成功です！
+
+## 開発ルール
+
+### ライブラリの追加
+* バックエンド
+```
+poretry add <library_name>
+```
+
+### gitの運用
+1. Branchを切る
+```
+feat/your_name/function
+ex: feat/matsui/create_environment
+```
+2. 実装し，gitにpushした上で``develop``ブランチにマージするためのPRを作成．``reviewer``に``ReiMatsui``を設定してください．
+
+3. ``main``ブランチに更新がある場合は，``main``ブランチを最新にした上でmergeしてからpushしてください．
