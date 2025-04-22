@@ -10,6 +10,6 @@ class Parking(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     total_slots = Column(Integer, nullable=False)
-    available_slots = Column(Integer, nullable=False)
+    avail_slots = Column(Integer, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 

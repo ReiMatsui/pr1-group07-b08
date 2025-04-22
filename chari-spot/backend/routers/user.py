@@ -14,17 +14,16 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    return crud.create_user(db=db, user=user)
+    return crud.create_user(db, user)
 
-@router.post("/user/get/{id}", response_model=schemas.UserResponse)
+@router.get("/user/get/{id}", response_model=schemas.UserResponse)
 def update_user(id: int, db: Session = Depends(get_db)):
     return crud.get_user(db, id)
-
 
 @router.post("/user/update", response_model=schemas.UserResponse)
 def update_user(user: schemas.UserUpdate, db: Session = Depends(get_db)):
     return crud.update_user(db, user)
 
-@router.post("/user/delete/{id}")
+@router.delete("/user/delete/{id}")
 def update_user(id: int, db: Session = Depends(get_db)):
     return crud.delete_user(db, id)

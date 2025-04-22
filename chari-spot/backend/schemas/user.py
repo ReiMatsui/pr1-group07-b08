@@ -1,6 +1,7 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
-# 用户注册请求体
+
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
@@ -8,11 +9,11 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     id: int
-    username: str
-    email: EmailStr
-    password: str
+    username: Optional[str]     = None
+    email:    Optional[EmailStr] = None
+    password: Optional[str]     = None
 
-# 注册成功后返回的响应体
+
 class UserResponse(BaseModel):
     id: int
     username: str

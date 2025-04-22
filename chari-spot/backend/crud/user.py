@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 from models import user
 from schemas import user as schemas
 
-def create_user(db: Session, user: schemas.UserCreate):
+def create_user(db: Session, userCreate: schemas.UserCreate):
     db_user = user.User(
-        username=user.username,
-        email=user.email,
-        password=user.password
+        username=userCreate.username,
+        email=userCreate.email,
+        password=userCreate.password
     )
     db.add(db_user)
     db.commit()
