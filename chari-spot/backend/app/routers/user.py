@@ -15,3 +15,4 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     return crud.create_user(db=db, user=user)
+

@@ -14,3 +14,4 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True  # 让 Pydantic 支持从 ORM 对象读取数据
+
