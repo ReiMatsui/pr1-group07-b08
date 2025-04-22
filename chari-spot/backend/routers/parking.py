@@ -1,8 +1,8 @@
 ### routers/parking.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.schemas import parking as schemas
-from app.crud import parking as crud
+from schemas import parking as schemas
+from crud import parking as crud
 from app.database import get_db
 
 router = APIRouter()

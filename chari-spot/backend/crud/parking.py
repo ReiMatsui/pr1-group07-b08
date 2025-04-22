@@ -1,7 +1,7 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.models import parking
-from app.schemas.parking import ParkingCreate
+from models import parking
+from schemas import ParkingCreate
 
 def create_parking(db: Session, parking: ParkingCreate):
     db_parking = parking.Parking(**parking.dict())

@@ -1,6 +1,5 @@
-
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from app.models import Base
+from models import Base
 
 class Parking(Base):
     __tablename__ = "parkings"

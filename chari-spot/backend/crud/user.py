@@ -1,7 +1,7 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from app.models import user
-from app.schemas import user as schemas
+from models import user
+from schemas import user as schemas
 
 def create_user(db: Session, user: schemas.UserCreate):
     db_user = user.User(
@@ -36,7 +36,7 @@ def update_user(db: Session, userUpdate: schemas.UserUpdate) -> Optional[user.Us
     if not user:
         return None
     if userUpdate.username is not None:
-        user.name = userUpdate.username
+        user.username = userUpdate.username
     if userUpdate.email is not None:
         user.email = userUpdate.email
     if userUpdate.password is not None:
