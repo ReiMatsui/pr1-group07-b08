@@ -12,7 +12,7 @@ def create_parking(db: Session, parkingCreate: ParkingCreate):
     return db_parking
 
 def get_parking(db: Session, id: int) -> Optional[parking.Parking]:
-    """Fetch a user by its primary key."""
+    """Fetch a slot by its primary key."""
     return db.get(parking.Parking, id)
 
 def get_parkings(db: Session, skip: int = 0, limit: int = 100):
