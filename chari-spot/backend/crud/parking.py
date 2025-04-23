@@ -23,20 +23,10 @@ def update_slot(db: Session, slotUpdate: ParkingUpdate) -> Optional[parking.Park
     slot = get_parking(db, slotUpdate.id)
     if not slot:
         raise HTTPException(status_code=400, detail="Slot id not found.")
-    if slotUpdate.name is not None:
-        slot.name = slotUpdate.name
-    if slotUpdate.address is not None:
-        slot.address = slotUpdate.address
-    if slotUpdate.latitude is not None:
-        slot.latitude = slotUpdate.latitude
-    if slotUpdate.longitude is not None:
-        slot.longitude = slotUpdate.longitude
-    if slotUpdate.total_slots is not None:
-        slot.total_slots = slotUpdate.total_slots
-    if slotUpdate.avail_slots is not None:
-        slot.avail_slots = slotUpdate.avail_slots
-    if slotUpdate.owner_id is not None:
-        slot.owner_id = slotUpdate.owner_id
+    
+    update_data = slotUpdate.model_dump(exclude_unset=True)  
+    for key, value in update_data.items():
+        setattr(slot, key, value)
     
     db.commit()
     db.refresh(slot)

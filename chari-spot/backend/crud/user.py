@@ -35,12 +35,11 @@ def update_user(db: Session, userUpdate: schemas.UserUpdate) -> Optional[user.Us
     user = get_user(db, userUpdate.id)
     if not user:
         return None
-    if userUpdate.username is not None:
-        user.username = userUpdate.username
-    if userUpdate.email is not None:
-        user.email = userUpdate.email
-    if userUpdate.password is not None:
-        user.password = userUpdate.password
+    
+    update_data = userUpdate.model_dump(exclude_unset=True)  
+    for key, value in update_data.items():
+        setattr(user, key, value)
+    
     db.commit()
     db.refresh(user)
     return user
