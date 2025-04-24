@@ -34,7 +34,7 @@ def update_slot(db: Session, slotUpdate: ParkingUpdate) -> Optional[parking.Park
 
 def delete_slot(db: Session, slot_id: id) -> bool:
     """Delete a slot by ID. Returns True if deleted, False if not found."""
-    slot = get_parkings(db, slot_id)
+    slot = get_parking(db, slot_id)
     if not slot:
         return False
     
