@@ -20,5 +20,5 @@ class UserResponse(BaseModel):
     email: EmailStr
 
     class Config:
-        orm_mode = True  # 让 Pydantic 支持从 ORM 对象读取数据
+        from_attributes = True  # 让 Pydantic 支持从 ORM 对象读取数据
 
