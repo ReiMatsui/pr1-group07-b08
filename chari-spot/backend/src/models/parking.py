@@ -1,6 +1,5 @@
-
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
-from app.models import Base
+from models import Base
 
 class Parking(Base):
     __tablename__ = "parkings"
@@ -10,7 +9,7 @@ class Parking(Base):
     address = Column(String, nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
-    available_slots = Column(Integer, nullable=False)
     total_slots = Column(Integer, nullable=False)
+    avail_slots = Column(Integer, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
