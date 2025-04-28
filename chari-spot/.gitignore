@@ -7,3 +7,15 @@
 
 # OS
 Thumbs.db
+
+# Flutter build artifacts
+build/
+.dart_tool/
+.packages
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE settings
+.idea/
+.vscode/
