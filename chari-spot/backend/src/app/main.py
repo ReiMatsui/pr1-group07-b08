@@ -1,14 +1,10 @@
 # coding: utf-8
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from app.routers import user
-from app.routers import parking
-from app.models import user as user_model
-from app.database import engine, get_db
-from app import crud, schemas
-from app.models import Base
-
+from routers import user
+from routers import parking
+from models import user as user_model
+from app.database import engine
 
 
 app = FastAPI()
