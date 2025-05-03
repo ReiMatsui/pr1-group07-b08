@@ -99,4 +99,4 @@ ex: feat/matsui/create_environment
 ```
 2. 実装し，gitにpushした上で``develop``ブランチにマージするためのPRを作成．``reviewer``に``ReiMatsui``を設定してください．
 
-3. ``main``ブランチに更新がある場合は，``main``ブランチを最新にした上でmergeしてからpushしてください．
+3. ``develop``ブランチに更新がある場合は，``develop``ブランチを最新にした上でmergeしてからpushしてください．
