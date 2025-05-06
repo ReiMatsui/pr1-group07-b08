@@ -4,15 +4,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import user
 from routers import parking
 from models import user as user_model
-from app.database import engine
-
+from app.database import engine, SQLALCHEMY_DATABASE_URL  # ✅ ← ここ修正済み
 
 app = FastAPI()
+
+import os
+
+print("### FastAPI working directory:", os.getcwd())
+print("### FastAPI using DB path:", SQLALCHEMY_DATABASE_URL)
 
 # FlutterからアクセスできるようCORS許可
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # 本番は制限する
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,3 +34,21 @@ app.include_router(parking.router)
 @app.get("/api/hello")
 def read_root():
     return {"message": "Hello from FastAPI!"}
+
+
+@app.get("/parkings")
+def read_parkings():
+    db: Session = SessionLocal()
+    parkings = db.query(models.Parking).all()
+    result = []
+    for parking in parkings:
+        result.append({
+            "id": parking.id,
+            "name": parking.name,
+            "address": parking.address,
+            "latitude": parking.latitude,
+            "longitude": parking.longitude,
+            "total_slots": parking.total_slots,
+            "avail_slots": parking.avail_slots,
+        })
+    return result
