@@ -21,6 +21,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class ParkingSpot {
+  final int id;
+  final String name;
+  final String address;
+  final double latitude;
+  final double longitude;
+
+  ParkingSpot({
+    required this.id,
+    required this.name,
+    required this.address,
+    required this.latitude,
+    required this.longitude,
+  });
+}
+
 class ParkingMapScreen extends StatefulWidget {
   @override
   _ParkingMapScreenState createState() => _ParkingMapScreenState();
@@ -31,6 +47,39 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
   LatLng? _currentLocationMarker;
+  List<ParkingSpot> _parkingSpots = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadParkingSpots();
+  }
+
+  Future<void> _loadParkingSpots() async {
+    try {
+      final url = Uri.parse('http://localhost:8000/parkings');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _parkingSpots = data.map((item) {
+            return ParkingSpot(
+              id: item['id'],
+              name: item['name'],
+              address: item['address'],
+              latitude: item['latitude'],
+              longitude: item['longitude'],
+            );
+          }).toList();
+        });
+      } else {
+        _showError("駐車場データの取得に失敗しました");
+      }
+    } catch (e) {
+      _showError("通信エラー: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +94,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate:
-                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                 subdomains: ['a', 'b', 'c'],
               ),
               MarkerLayer(
@@ -54,16 +102,12 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               ),
             ],
           ),
-
-          // 検索バー
           Positioned(
             top: 40,
             left: 15,
             right: 15,
             child: _buildSearchBar(),
           ),
-
-          // 「このエリアで検索」ボタン
           Positioned(
             bottom: 100,
             left: 40,
@@ -75,11 +119,9 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               ),
               icon: Icon(Icons.refresh),
               label: Text("このエリアで検索"),
-              onPressed: () {},
+              onPressed: _loadParkingSpots,
             ),
           ),
-
-          // 現在地ボタン
           Positioned(
             bottom: 30,
             right: 20,
@@ -90,8 +132,6 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
           ),
         ],
       ),
-
-      // 下部ナビゲーションバー
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.teal,
         unselectedItemColor: Colors.grey,
@@ -121,7 +161,6 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     );
   }
 
-  // 検索バー
   Widget _buildSearchBar() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -152,25 +191,25 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     );
   }
 
-  // マーカー作成
   List<Marker> _createMarkers() {
-    List<Marker> markers = [
-      Marker(
-        width: 80.0,
-        height: 80.0,
-        point: LatLng(35.031, 135.78),
-        rotate: true,
-        child: _buildPriceMarker("¥30〜"),
-      ),
-      Marker(
-        width: 80.0,
-        height: 80.0,
-        point: LatLng(35.0305, 135.781),
-        rotate: true,
-        child: _buildPriceMarker("¥770"),
-      ),
-    ];
+    List<Marker> markers = [];
 
+    // 駐輪場スポット → 大きい赤ピンマーク
+    markers.addAll(_parkingSpots.map((spot) {
+      return Marker(
+        width: 60.0,
+        height: 60.0,
+        point: LatLng(spot.latitude, spot.longitude),
+        rotate: true,
+        child: Icon(
+          Icons.location_pin,
+          color: Colors.red,
+          size: 60,
+        ),
+      );
+    }));
+
+    // 現在地マーカー
     if (_currentLocationMarker != null) {
       markers.add(
         Marker(
@@ -189,25 +228,6 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     return markers;
   }
 
-  Widget _buildPriceMarker(String price) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.green,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        price,
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  // 現在地取得
   Future<void> _goToCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -242,7 +262,6 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
     _mapController.move(currentLocation, 15.0);
   }
 
-  // 地名検索
   Future<void> _searchLocation() async {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
@@ -253,7 +272,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
     try {
       final response = await http.get(url, headers: {
-        'User-Agent': 'flutter-map-app-example', // 任意のアプリ名を記述
+        'User-Agent': 'flutter-map-app-example',
       });
 
       if (response.statusCode == 200) {
