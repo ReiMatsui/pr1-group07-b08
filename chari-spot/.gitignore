@@ -19,3 +19,5 @@ build/
 # IDE settings
 .idea/
 .vscode/
+
+chari-spot.db

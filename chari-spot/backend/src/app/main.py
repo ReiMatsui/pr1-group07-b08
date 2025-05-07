@@ -4,7 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import user
 from routers import parking
 from models import user as user_model
-from app.database import engine, SQLALCHEMY_DATABASE_URL  # ✅ ← ここ修正済み
+from models import parking as parking_model
+from sqlalchemy.orm import Session
+from app.database import engine, SQLALCHEMY_DATABASE_URL, SessionLocal
 
 app = FastAPI()
 
@@ -39,7 +41,7 @@ def read_root():
 @app.get("/parkings")
 def read_parkings():
     db: Session = SessionLocal()
-    parkings = db.query(models.Parking).all()
+    parkings = db.query(parking_model).all()
     result = []
     for parking in parkings:
         result.append({
