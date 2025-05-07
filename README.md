@@ -21,7 +21,6 @@ Practice of Infomation Systemsの7班のプロジェクトです．
 
 ## セットアップ手順
 
-
 ### バックエンド（FastAPI + Poetry）
 
 0. Poetryのダウンロード（なければ）
@@ -83,6 +82,17 @@ flutter run
 * バックエンドの3を行い，APIが起動していることを確認してください．
 * アプリ画面に`Hello from FastAPI!`と表示されれば成功です！
 
+## アプリ起動方法
+
+1. スクリプトに実行権限を付与
+```
+chmod +x start.sh
+```
+
+2.  pr1-group07-b08でスクリプトの実行
+```
+./start.sh
+```
 ## 開発ルール
 
 ### ライブラリの追加
