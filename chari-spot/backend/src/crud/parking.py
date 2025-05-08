@@ -5,7 +5,7 @@ from models import parking
 from schemas.parking import ParkingCreate, ParkingUpdate
 
 def create_parking(db: Session, parkingCreate: ParkingCreate):
-    db_parking = parking.Parking(**parkingCreate.dict())
+    db_parking = parking.Parking(**parkingCreate.model_dump())
     db.add(db_parking)
     db.commit()
     db.refresh(db_parking)
