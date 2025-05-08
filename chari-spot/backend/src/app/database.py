@@ -1,6 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, declarative_base
 
 # SQLite Local Database URL
 SQLALCHEMY_DATABASE_URL = "sqlite:///./chari-spot.db"

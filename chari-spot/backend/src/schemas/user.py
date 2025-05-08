@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 
 class UserCreate(BaseModel):
@@ -19,6 +19,6 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
 
-    class Config:
-        from_attributes = True  # 让 Pydantic 支持从 ORM 对象读取数据
+    model_config = ConfigDict(from_attributes = True)
+
 

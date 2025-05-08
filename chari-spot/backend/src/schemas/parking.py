@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class ParkingCreate(BaseModel):
@@ -30,5 +30,4 @@ class ParkingResponse(BaseModel):
     total_slots: int
     owner_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
