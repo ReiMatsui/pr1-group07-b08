@@ -4,10 +4,11 @@ from loguru import logger
 from datetime import datetime
 from pathlib import Path
 import queue
+import numpy
 
-from src.utils.camera_manager import CameraManager
-from src.utils.video_recorder import VideoRecorder
-from src.utils.bicycle_detector import BicycleDetector
+from utils.camera_manager import CameraManager
+from utils.video_recorder import VideoRecorder
+from utils.bicycle_detector import BicycleDetector
 
 
 class App(BaseModel):
@@ -50,18 +51,29 @@ class App(BaseModel):
                 
                 if frame is None:
                     logger.error("フレームの取得に失敗しました")
-                    break
+                    continue
                 
                 try:
-                    bicycle_detector.put_to_queue(frame)
+                    bicycle_detector.put_to_queue(frame.copy())
                 except queue.Full:
                     continue
                 
                 try:
-                    processed_frame =  bicycle_detector.get_from_queue()
+                    processed_tuple =  bicycle_detector.get_from_queue()
+                    if processed_tuple is None:
+                        logger.error("processed_frameがNoneです")
+                        continue
+                    processed_frame = processed_tuple[2]
                 except queue.Empty:
                     continue
                 
+                if not isinstance(processed_frame, numpy.ndarray):
+                    logger.error(f"processed_frameの型が不正です: {type(processed_frame)}")
+                    continue
+
+                if processed_frame.ndim != 3 or processed_frame.shape[2] != 3:
+                    logger.error(f"processed_frameの形状が不正です: {processed_frame.shape}")
+                    continue
                 # 画面にフレームを表示
                 self.camera_manager.imshow("Camera", processed_frame)
                 
@@ -70,9 +82,6 @@ class App(BaseModel):
                 
                 # 'q'キーで終了
                 if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-                else:
-                    logger.error("フレームの取得に失敗しました")
                     break
             
         finally:
@@ -84,4 +93,3 @@ class App(BaseModel):
 if __name__ == "__main__":
     app = App()
     app.run()
-    logger.info("アプリケーションを開始します")

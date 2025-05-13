@@ -22,7 +22,7 @@ class CameraManager:
         
         if self.ret:
             return cv2.flip(self.frame, 1)
-        return None, None
+        return None
     
     def imshow(self, window_name: str, image: numpy.ndarray):
         try:
