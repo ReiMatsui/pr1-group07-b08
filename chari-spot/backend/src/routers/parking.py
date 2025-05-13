@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from schemas import parking as schemas
 from crud import parking as crud
 from app.database import get_db
+from schemas.parking import NearbySearchRequest #refactoring needed
 
 router = APIRouter()
 
@@ -22,3 +23,8 @@ def read_owner_parkings(owner_id: int, db: Session = Depends(get_db)):
 @router.delete("/parkings/delete/{id}")
 def delete_parkings(id: int, db: Session = Depends(get_db)):
     return crud.delete_slot(db, id)
+
+
+@router.post("/parkings/nearby", response_model=list[schemas.ParkingResponse],summary="Find nearby parkings",)
+def search_nearby_parkings(request: NearbySearchRequest, db: Session = Depends(get_db)):
+    return crud.get_nearby_parkings(db, request.latitude, request.longitude, request.radius_km)
