@@ -18,17 +18,25 @@ class App(BaseModel):
     model_config = {
         "arbitrary_types_allowed": True
     }
-        
     camera_no: int = Field(default=0, description="使用するカメラの番号")
     video_name: str = Field(default="output.mp4", description="保存するビデオの名前")
-    camera_manager: CameraManager = CameraManager(camera_no=0)
-    video_recorder: VideoRecorder = VideoRecorder(
-        session_dir=Path("output") / datetime.now().strftime("%Y%m%d_%H%M%S"),
-        video_name="output.mp4",
-        width=640,
-        height=480,
-        fps=20.0
-    )
+    session_dir: Path = None  # セッションディレクトリを保持
+    camera_manager: CameraManager = None
+    video_recorder: VideoRecorder = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        # セッションディレクトリを作成
+        self.session_dir = self._create_session_dir()
+        # CameraManagerとVideoRecorderを初期化
+        self.camera_manager = CameraManager(camera_no=self.camera_no)
+        self.video_recorder = VideoRecorder(
+            session_dir=self.session_dir,
+            video_name=self.video_name,
+            width=1280,
+            height=720,
+            fps=20.0
+        )
         
     def _create_session_dir(self):
         session_start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -67,13 +75,7 @@ class App(BaseModel):
                 except queue.Empty:
                     continue
                 
-                if not isinstance(processed_frame, numpy.ndarray):
-                    logger.error(f"processed_frameの型が不正です: {type(processed_frame)}")
-                    continue
-
-                if processed_frame.ndim != 3 or processed_frame.shape[2] != 3:
-                    logger.error(f"processed_frameの形状が不正です: {processed_frame.shape}")
-                    continue
+                logger.info(f"processed_frameのサイズ: {processed_frame.shape}")
                 # 画面にフレームを表示
                 self.camera_manager.imshow("Camera", processed_frame)
                 

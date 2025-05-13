@@ -12,7 +12,7 @@ class CameraManager:
         # 画質を取得し低めに設定する
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            
+        logger.info(f"カメラの解像度: {self.width}x{self.height}")
         # FPSを取得
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
         logger.info(f"カメラのFPS: {self.fps}")
