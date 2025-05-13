@@ -2,10 +2,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from schemas import parking as schemas
+from app.auth import get_current_user
 from crud import parking as crud
 from app.database import get_db
 
 router = APIRouter()
+
+protected_router = APIRouter(
+    prefix="/parkings",
+    tags=["parking"],
+    dependencies=[Depends(get_current_user)],   # ← apply to all routes here
+)
 
 @router.post("/parkings/register", response_model=schemas.ParkingResponse)
 def create_parking(parking: schemas.ParkingCreate, db: Session = Depends(get_db)):
