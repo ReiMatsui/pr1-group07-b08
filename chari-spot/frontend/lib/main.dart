@@ -4,6 +4,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'registration.dart';
+import 'profile_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,8 +17,60 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '駐車場マップUI',
       theme: ThemeData.dark(),
-      home: ParkingMapScreen(),
+      home: MainScreen(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.jumpToPage(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(), // スワイプでのページ切り替えを無効化
+        children: [
+          ParkingMapScreen(), // 駐車場を探す画面
+          RegistrationScreen(), // 登録画面
+          ProfileScreen(), // プロフィール画面
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.teal,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_parking),
+            label: '駐車場を探す',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: '登録',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'プロフィール',
+          ),
+        ],
+      ),
     );
   }
 }
@@ -129,32 +183,6 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               onPressed: _goToCurrentLocation,
               child: Icon(Icons.navigation),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.teal,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_parking),
-            label: '駐車場を探す',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            label: 'お気に入り',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: '予約情報',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu),
-            label: 'メニュー',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'オーナー',
           ),
         ],
       ),
