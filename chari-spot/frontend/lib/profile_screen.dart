@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       };
 
       try {
-        final response = await http.put(
+        final response = await http.post( // PUTからPOSTに変更
           url,
           headers: {'Content-Type': 'application/json'},
           body: json.encode(requestBody),
