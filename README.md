@@ -82,6 +82,27 @@ flutter run
 * バックエンドの3を行い，APIが起動していることを確認してください．
 * アプリ画面に`Hello from FastAPI!`と表示されれば成功です！
 
+### カメラシステム
+1. ディレクトリ移動
+```
+cd chari-spo
+```
+
+2. ライブラリのインストール
+```
+poetry install
+```
+
+3. PYTHONPATHの設定
+```
+export PYTHONPATH=$PWD/src
+```
+
+4. 実行
+```
+poetry run python src/app/main.py
+```
+
 ## アプリ起動方法
 
 1. スクリプトに実行権限を付与
