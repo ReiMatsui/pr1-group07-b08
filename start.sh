@@ -15,7 +15,7 @@ API_PID=$!
 # フロントエンドの起動
 echo "Starting Flutter frontend..."
 cd "$PROJECT_ROOT/chari-spot//frontend"
-flutter run -d chorme
+flutter run -d chrome
 
 # APIサーバーを停止
 echo "Stopping API server..."
