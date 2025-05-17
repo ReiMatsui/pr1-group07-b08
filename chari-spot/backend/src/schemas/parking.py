@@ -31,3 +31,8 @@ class ParkingResponse(BaseModel):
     owner_id: int
 
     model_config = ConfigDict(from_attributes = True)
+
+class NearbySearchRequest(BaseModel):
+    latitude: float
+    longitude: float
+    radius_km: float = 1.0  # default radius of 1 km
