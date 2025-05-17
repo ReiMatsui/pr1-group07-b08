@@ -1,19 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from schemas import parking as schemas
+from app.auth import get_current_user
 from crud import parking as crud
 from app.database import get_db
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/parkings",
+    tags=["parking"],
+    dependencies=[Depends(get_current_user)],   # ← apply to all routes here
+)
 
 # 駐輪場の新規登録
 @router.post("/parkings/register", response_model=schemas.ParkingResponse)
 def create_parking(parking: schemas.ParkingCreate, db: Session = Depends(get_db)):
     return crud.create_parking(db, parking)
 
-# 🔧 駐輪場一覧を取得（UTF-8 明示）
+# 駐輪場一覧を取得（UTF-8 明示）
 @router.get("/parkings")
 def get_all_parkings(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     parkings = crud.get_parkings(db, skip=skip, limit=limit)
