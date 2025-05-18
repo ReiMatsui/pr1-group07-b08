@@ -2,12 +2,14 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from models import user
 from schemas import user as schemas
+from app import auth
 
 def create_user(db: Session, userCreate: schemas.UserCreate):
+    hashed_password = auth.get_password_hash(userCreate.password)
     db_user = user.User(
         username=userCreate.username,
         email=userCreate.email,
-        password=userCreate.password
+        password=hashed_password,
     )
     db.add(db_user)
     db.commit()
