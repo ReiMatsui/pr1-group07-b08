@@ -3,6 +3,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RegistrationScreen extends StatefulWidget {
+  final String token; // トークンを受け取る
+
+  RegistrationScreen({required this.token});
+
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
@@ -17,7 +21,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final url = Uri.parse('http://localhost:8000/parkings/register');
+      final url = Uri.parse('http://localhost:8000/parkings/parkings/register');
       final requestBody = {
         'name': _nameController.text,
         'address': _addressController.text,
@@ -31,11 +35,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       try {
         final response = await http.post(
           url,
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+          },
           body: json.encode(requestBody),
         );
 
-        if (response.statusCode == 201) {
+        if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('登録が成功しました: ID ${responseData['id']}')),
