@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 import queue
 import numpy
-import pyttsx3
+# import pyttsx3
 
 from utils.camera_manager import CameraManager
 from utils.video_recorder import VideoRecorder
