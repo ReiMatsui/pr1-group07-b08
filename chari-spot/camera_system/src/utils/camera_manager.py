@@ -10,8 +10,8 @@ class CameraManager:
         self.capture = cv2.VideoCapture(camera_no)
         
         # 画質を取得し低めに設定する
-        self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH) //3)
-        self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT) //3)
+        self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH) //4)
+        self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT) //4)
         
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)

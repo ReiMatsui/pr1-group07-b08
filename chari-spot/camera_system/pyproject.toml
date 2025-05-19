@@ -11,6 +11,8 @@ opencv-python = "<=4.11.0.86"
 loguru = "^0.7.3"
 pydantic = "^2.11.4"
 ultralytics = "^8.3.113"
+torch = "2.2"
+numpy = "1.26.4"
 
 [build-system]
 requires = ["poetry-core"]
