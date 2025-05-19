@@ -8,7 +8,7 @@ from app import auth
 from app.database import get_db
 from models import user as models
 
-router = APIRouter()
+router = APIRouter(tags=["user"])
 
 
 @router.post("/user/register", response_model=user.UserResponse)
@@ -34,22 +34,23 @@ async def login_for_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = auth.create_access_token(
-        data={"sub": user.email},
+        data={"user_id": user.id},
         expires_delta=timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/user/get/{id}", response_model=user.UserResponse)
-def update_user(id: int, db: Session = Depends(get_db)):
-    return crud.get_user(db, id)
+@router.get("/user/get", response_model=user.UserResponse)
+def get_user(db: Session = Depends(get_db), user: models.User = Depends(auth.get_current_user)):
+    return crud.get_user(db, user.id)
 
 
 @router.post("/user/update", response_model=user.UserResponse)
-def update_user(user: user.UserUpdate, db: Session = Depends(get_db)):
+def update_user(user_up: user.UserUpdate, db: Session = Depends(get_db), user: models.User = Depends(auth.get_current_user)):
+    user_up.id = user.id
     return crud.update_user(db, user)
 
 
-@router.delete("/user/delete/{id}")
-def update_user(id: int, db: Session = Depends(get_db)):
-    return crud.delete_user(db, id)
+@router.delete("/user/delete")
+def update_user(db: Session = Depends(get_db), user: models.User = Depends(auth.get_current_user)):
+    return crud.delete_user(db, user.id)

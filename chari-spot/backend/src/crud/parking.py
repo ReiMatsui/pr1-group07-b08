@@ -18,6 +18,10 @@ def get_parking(db: Session, id: int) -> Optional[parking.Parking]:
 def get_parkings(db: Session, skip: int = 0, limit: int = 100):
     return db.query(parking.Parking).offset(skip).limit(limit).all()
 
+def get_parking_by_owner(db: Session, u_id: int) -> Optional[list[parking.Parking]]:
+    """Fetch a list of slots by owner ID."""
+    return db.query(parking.Parking).filter(parking.Parking.owner_id == u_id).all()
+
 def update_slot(db: Session, slotUpdate: ParkingUpdate) -> Optional[parking.Parking]:
     """Update fields on a slot. Returns the updated slot, or None if not found."""
     slot = get_parking(db, slotUpdate.id)
@@ -42,4 +46,3 @@ def delete_slot(db: Session, slot_id: id) -> bool:
     db.commit()
     
     return True
-
