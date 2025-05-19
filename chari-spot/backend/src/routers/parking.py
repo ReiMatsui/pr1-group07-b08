@@ -9,7 +9,11 @@ from fastapi.encoders import jsonable_encoder
 from models import user as models
 
 
-router = APIRouter(tags=["parking"])
+router = APIRouter(
+    tags=["parking"],
+    prefix="/parking",
+    dependencies=[Depends(get_current_user)],
+)
 
 
 # 駐輪場の新規登録
@@ -32,6 +36,19 @@ def get_all_parkings(skip: int = 0, limit: int = 100, db: Session = Depends(get_
     )
 
 
+# 駐輪場の詳細取得（owned）
+@router.get("/owned", response_model=list[schemas.ParkingResponse])
+def get_parking_by_owner(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    parkings = crud.get_parking_by_owner(db, user.id)
+    if len(parkings) == 0:
+        raise HTTPException(status_code=404, detail="駐輪場が見つかりません")
+    
+    response_data = []
+    for parking in parkings:
+        response_data.append(schemas.ParkingResponse.model_validate(parking))
+    return response_data
+
+
 # 駐輪場の詳細取得
 @router.get("/{parking_id}", response_model=schemas.ParkingResponse)
 def get_parking_detail(parking_id: int, db: Session = Depends(get_db)):
@@ -39,15 +56,6 @@ def get_parking_detail(parking_id: int, db: Session = Depends(get_db)):
     if parking is None:
         raise HTTPException(status_code=404, detail="駐輪場が見つかりません")
     return parking
-
-
-# 駐輪場の詳細取得（ユーザーID指定）
-@router.get("/owned", response_model=schemas.ParkingResponse)
-def get_parking_by_owner(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
-    parkings = crud.get_parking_by_owner(db, user.id)
-    if len(parkings) == 0:
-        raise HTTPException(status_code=404, detail="駐輪場が見つかりません")
-    return parkings
 
 
 # 駐輪場情報の更新
@@ -59,4 +67,10 @@ def update_parking(slot: schemas.ParkingUpdate, db: Session = Depends(get_db)):
 # 駐輪場の削除
 @router.delete("/delete/{id}")
 def delete_parking(id: int, db: Session = Depends(get_db)):
-    return crud.delete_slot(db, id)
+    flag = crud.delete_slot(db, id)
+    if not flag:
+        raise HTTPException(status_code=404, detail="Slot not found.")
+    return JSONResponse(
+        content={"message": "Slot deleted successfully."},
+        media_type="application/json; charset=utf-8"
+    )
