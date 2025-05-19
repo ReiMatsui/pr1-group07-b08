@@ -32,19 +32,19 @@ def list_users(db: Session, skip: int = 0, limit: int = 100) -> List[user.User]:
     """Return a slice of users for paging."""
     return db.query(user.User).offset(skip).limit(limit).all()
 
-def update_user(db: Session, userUpdate: schemas.UserUpdate) -> Optional[user.User]:
-    """Update fields on a User. Returns the updated User, or None if not found."""
-    user = get_user(db, userUpdate.id)
-    if not user:
+def update_user(db: Session, userUpdate: schemas.UserUpdate, user_id: int) -> Optional[user.User]:
+    user_obj = get_user(db, user_id)
+    if not user_obj:
         return None
-    
-    update_data = userUpdate.model_dump(exclude_unset=True)  
+
+    update_data = userUpdate.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(user, key, value)
-    
+        setattr(user_obj, key, value)
+
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(user_obj)
+    return user_obj
+
 
 def delete_user(db: Session, user_id: int) -> bool:
     """Delete a User by ID. Returns True if deleted, False if not found."""

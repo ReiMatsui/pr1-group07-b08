@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from models import parking
 from schemas.parking import ParkingCreate, ParkingUpdate
 
-def create_parking(db: Session, parkingCreate: ParkingCreate):
-    db_parking = parking.Parking(**parkingCreate.model_dump())
+def create_parking(db: Session, parkingCreate: ParkingCreate, user_id: int):
+    # Avoid got multiple values for argument 'owner_id'
+    db_parking = parking.Parking(**parkingCreate.model_dump(exclude={"owner_id"}), owner_id=user_id)
     db.add(db_parking)
     db.commit()
     db.refresh(db_parking)
@@ -36,7 +37,7 @@ def update_slot(db: Session, slotUpdate: ParkingUpdate) -> Optional[parking.Park
     db.refresh(slot)
     return slot
 
-def delete_slot(db: Session, slot_id: id) -> bool:
+def delete_slot(db: Session, slot_id: int) -> bool:
     """Delete a slot by ID. Returns True if deleted, False if not found."""
     slot = get_parking(db, slot_id)
     if not slot:
