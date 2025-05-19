@@ -36,21 +36,3 @@ app.include_router(parking.router)
 @app.get("/api/hello")
 def read_root():
     return {"message": "Hello from FastAPI!"}
-
-
-@app.get("/parkings")
-def read_parkings():
-    db: Session = SessionLocal()
-    parkings = db.query(parking_model).all()
-    result = []
-    for parking in parkings:
-        result.append({
-            "id": parking.id,
-            "name": parking.name,
-            "address": parking.address,
-            "latitude": parking.latitude,
-            "longitude": parking.longitude,
-            "total_slots": parking.total_slots,
-            "avail_slots": parking.avail_slots,
-        })
-    return result
