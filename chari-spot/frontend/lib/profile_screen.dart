@@ -3,17 +3,19 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
+  final String token; // トークンを受け取る
+
+  ProfileScreen({required this.token});
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final int userId = 1; // 仮のユーザーID
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _currentPasswordController = TextEditingController();
 
   bool _isLoading = false;
   bool _isEditing = false;
@@ -29,10 +31,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('http://localhost:8000/user/get/$userId');
+    final url = Uri.parse('http://localhost:8000/user/get');
 
     try {
-      final response = await http.get(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -42,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       } else {
         final errorData = json.decode(response.body);
-        _showError("取得に失敗しました: ${errorData['detail'][0]['msg']}");
+        _showError("取得に失敗しました: ${errorData['detail']}");
       }
     } catch (e) {
       _showError("通信エラー: $e");
@@ -53,34 +60,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _verifyPasswordAndEnableEditing() async {
-    final currentPassword = _currentPasswordController.text;
-
-    // 仮のパスワード検証（APIがある場合はここでリクエストを送信）
-    if (currentPassword == "correct_password") { // 仮の正しいパスワード
-      setState(() {
-        _isEditing = true;
-      });
-      Navigator.pop(context); // ダイアログを閉じる
-    } else {
-      _showError("パスワードが正しくありません");
-    }
-  }
-
   Future<void> _updateUserProfile() async {
     if (_formKey.currentState!.validate()) {
       final url = Uri.parse('http://localhost:8000/user/update');
       final requestBody = {
-        'id': userId,
         'username': _usernameController.text,
         'email': _emailController.text,
         'password': _passwordController.text,
       };
 
       try {
-        final response = await http.post( // PUTからPOSTに変更
+        final response = await http.post(
           url,
-          headers: {'Content-Type': 'application/json'},
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+          },
           body: json.encode(requestBody),
         );
 
@@ -94,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           });
         } else {
           final errorData = json.decode(response.body);
-          _showError("更新に失敗しました: ${errorData['detail'][0]['msg']}");
+          _showError("更新に失敗しました: ${errorData['detail']}");
         }
       } catch (e) {
         _showError("通信エラー: $e");
@@ -104,32 +99,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  void _showPasswordDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("現在のパスワードを入力"),
-          content: TextField(
-            controller: _currentPasswordController,
-            obscureText: true,
-            decoration: InputDecoration(labelText: "パスワード"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("キャンセル"),
-            ),
-            TextButton(
-              onPressed: _verifyPasswordAndEnableEditing,
-              child: Text("確認"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -197,7 +166,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Text("メールアドレス: ${_emailController.text}", style: TextStyle(fontSize: 18)),
                         SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: _showPasswordDialog,
+                          onPressed: () {
+                            setState(() {
+                              _isEditing = true; // 編集モードに切り替え
+                            });
+                          },
                           child: Text('修正'),
                         ),
                       ],

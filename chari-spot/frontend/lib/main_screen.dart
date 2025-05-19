@@ -36,7 +36,7 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           ParkingMapScreen(token: widget.token), // トークンを渡す
           RegistrationScreen(token: widget.token), // トークンを渡す
-          ProfileScreen(),
+          ProfileScreen(token: widget.token), // トークンを渡す
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -107,7 +107,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
   Future<void> _loadParkingSpots() async {
     try {
-      final url = Uri.parse('http://localhost:8000/parkings/parkings');
+      final url = Uri.parse('http://localhost:8000/parking/all');
       final response = await http.get(
         url,
         headers: {

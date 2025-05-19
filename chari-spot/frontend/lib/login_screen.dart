@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'ユーザー名'),
+              decoration: InputDecoration(labelText: 'メールアドレス'),
             ),
             TextField(
               controller: _passwordController,
