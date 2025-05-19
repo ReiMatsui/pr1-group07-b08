@@ -18,8 +18,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
-# token endpoint  /user/login ????
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
