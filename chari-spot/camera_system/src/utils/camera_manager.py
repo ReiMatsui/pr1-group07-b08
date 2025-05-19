@@ -10,9 +10,16 @@ class CameraManager:
         self.capture = cv2.VideoCapture(camera_no)
         
         # 画質を取得し低めに設定する
+        self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH) //2)
+        self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT) //2)
+        
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        
+        # OpenCVが調整する場合があるので再取得
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        logger.info(f"カメラの解像度: {self.width}x{self.height}")
+        
         # FPSを取得
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
         logger.info(f"カメラのFPS: {self.fps}")

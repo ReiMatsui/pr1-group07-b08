@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 import queue
 import numpy
+import pyttsx3
 
 from utils.camera_manager import CameraManager
 from utils.video_recorder import VideoRecorder
@@ -37,7 +38,7 @@ class App(BaseModel):
             height=720,
             fps=20.0
         )
-        
+            
     def _create_session_dir(self):
         session_start_time = datetime.now().strftime("%Y%m%d_%H%M%S")
         session_dir = Path("output") / session_start_time

@@ -10,6 +10,7 @@ python = "^3.11"
 opencv-python = "^4.11.0.86"
 loguru = "^0.7.3"
 ultralytics = "^8.3.113"
+pyttsx3 = "^2.98"
 
 
 [build-system]
