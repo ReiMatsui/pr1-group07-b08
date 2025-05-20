@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:latlong2/latlong.dart';
+import 'map_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String token; // トークンを受け取る
@@ -103,9 +105,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         final _formKey = GlobalKey<FormState>();
         final TextEditingController _nameController = TextEditingController();
         final TextEditingController _addressController = TextEditingController();
-        final TextEditingController _latitudeController = TextEditingController();
-        final TextEditingController _longitudeController = TextEditingController();
         final TextEditingController _capacityController = TextEditingController();
+        LatLng? _selectedLocation;
 
         return Padding(
           padding: EdgeInsets.only(
@@ -139,27 +140,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _latitudeController,
-                  decoration: InputDecoration(labelText: '緯度'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '緯度を入力してください';
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapScreen(
+                          initialLocation: LatLng(35.6895, 139.6917), // 初期位置（例: 東京）
+                        ),
+                      ),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        _selectedLocation = result;
+                      });
                     }
-                    return null;
                   },
-                ),
-                TextFormField(
-                  controller: _longitudeController,
-                  decoration: InputDecoration(labelText: '経度'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '経度を入力してください';
-                    }
-                    return null;
-                  },
+                  child: Text(_selectedLocation == null
+                      ? '地図で位置を選択'
+                      : '選択済み: ${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'),
                 ),
                 TextFormField(
                   controller: _capacityController,
@@ -175,14 +175,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    if (_formKey.currentState!.validate() && _selectedLocation != null) {
                       _submitForm(
                         _nameController.text,
                         _addressController.text,
-                        double.parse(_latitudeController.text),
-                        double.parse(_longitudeController.text),
+                        _selectedLocation!.latitude,
+                        _selectedLocation!.longitude,
                         int.parse(_capacityController.text),
                       );
+                    } else if (_selectedLocation == null) {
+                      _showError('地図で位置を選択してください');
                     }
                   },
                   child: Text('登録'),
