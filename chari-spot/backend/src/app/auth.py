@@ -10,14 +10,15 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from models import user as user_model
+from crud import user as user_crud
 
 # Secret for JWT (keep this safe!)
-SECRET_KEY = "your-very-long-random-string"
+SECRET_KEY = "lasgagasdgzasdflkasdivnadflaszc_dasdfha"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -29,7 +30,7 @@ def get_password_hash(password: str) -> str:
 
 
 def authenticate_user(db: Session, email: str, password: str):
-    user = db.query(user_model.User).filter(user_model.User.email == email).first()
+    user = user_crud.get_user_by_email(db, email)
     if not user or not verify_password(password, user.password):
         return None
     return user
@@ -37,7 +38,7 @@ def authenticate_user(db: Session, email: str, password: str):
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -45,7 +46,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
-):
+)-> user_model.User:
     credentials_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid authentication credentials",
@@ -53,13 +54,13 @@ async def get_current_user(
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if not email:
+        u_id: int = payload.get("user_id")
+        if not u_id:
             raise credentials_exc
     except JWTError:
         raise credentials_exc
 
-    user = db.query(user_model.User).filter(user_model.User.email == email).first()
+    user = user_crud.get_user(db, u_id)
     if not user:
         raise credentials_exc
     return user
