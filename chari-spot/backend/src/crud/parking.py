@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from models import parking
 from schemas.parking import ParkingCreate, ParkingUpdate
 
-def create_parking(db: Session, parkingCreate: ParkingCreate, user_id: int):
-    # Avoid got multiple values for argument 'owner_id'
-    db_parking = parking.Parking(**parkingCreate.model_dump(exclude={"owner_id"}), owner_id=user_id)
+def create_parking(db: Session, parkingCreate: ParkingCreate) -> parking.Parking:
+    """Create a new parking slot."""
+    db_parking = parking.Parking(**parkingCreate.model_dump())
     db.add(db_parking)
     db.commit()
     db.refresh(db_parking)
@@ -27,7 +27,7 @@ def update_slot(db: Session, slotUpdate: ParkingUpdate) -> Optional[parking.Park
     """Update fields on a slot. Returns the updated slot, or None if not found."""
     slot = get_parking(db, slotUpdate.id)
     if not slot:
-        raise HTTPException(status_code=400, detail="Slot id not found.")
+        return None
     
     update_data = slotUpdate.model_dump(exclude_unset=True)  
     for key, value in update_data.items():

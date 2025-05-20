@@ -23,7 +23,10 @@ def create_parking(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    return crud.create_parking(db, parking, user.id)
+    parking.owner_id = user.id
+    parking = crud.create_parking(db, parking)
+    
+    return schemas.ParkingResponse.model_validate(parking)
 
 
 # 駐輪場一覧を取得（UTF-8 明示）
@@ -40,7 +43,6 @@ def get_all_parkings(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 @router.get("/owned", response_model=list[schemas.ParkingResponse])
 def get_parking_by_owner(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     parkings = crud.get_parking_by_owner(db, user.id)
-
     
     # 駐輪場がない場合でも空のリストを返す
     response_data = []
@@ -70,8 +72,9 @@ def update_parking(
         raise HTTPException(status_code=404, detail="Slot not found.")
     if existing.owner_id != user.id:
         raise HTTPException(status_code=403, detail="Not allowed to update this parking.")
+    
+    slot.owner_id = user.id
     return crud.update_slot(db, slot)
-
 
 
 # 駐輪場の削除
