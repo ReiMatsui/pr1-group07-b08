@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
-  final String token; // トークンを受け取る
+  final String token;
 
   ProfileScreen({required this.token});
 
@@ -12,7 +13,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final int userId = 1; // ユーザーIDは固定
+  final int userId = 1;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -38,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final response = await http.get(
         url,
         headers: {
-          'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+          'Authorization': 'Bearer ${widget.token}',
         },
       );
 
@@ -76,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           url,
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+            'Authorization': 'Bearer ${widget.token}',
           },
           body: json.encode(requestBody),
         );
@@ -84,7 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('更新が成功しました: ${data['username']}')),
+            SnackBar(content: Text('更新が成功しました: ${data['username']}', style: GoogleFonts.notoSansJp())),
           );
           setState(() {
             _isEditing = false;
@@ -100,14 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, style: GoogleFonts.notoSansJp())),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('プロフィール'),
+        title: Text('プロフィール', style: GoogleFonts.notoSansJp()),
+        backgroundColor: Colors.teal,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -120,7 +124,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           TextFormField(
                             controller: _usernameController,
-                            decoration: InputDecoration(labelText: 'ユーザー名'),
+                            decoration: InputDecoration(
+                              labelText: 'ユーザー名',
+                              labelStyle: GoogleFonts.notoSansJp(),
+                            ),
+                            style: GoogleFonts.notoSansJp(),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'ユーザー名を入力してください';
@@ -130,7 +138,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           TextFormField(
                             controller: _emailController,
-                            decoration: InputDecoration(labelText: 'メールアドレス'),
+                            decoration: InputDecoration(
+                              labelText: 'メールアドレス',
+                              labelStyle: GoogleFonts.notoSansJp(),
+                            ),
+                            style: GoogleFonts.notoSansJp(),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'メールアドレスを入力してください';
@@ -143,7 +155,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           TextFormField(
                             controller: _passwordController,
-                            decoration: InputDecoration(labelText: '新しいパスワード'),
+                            decoration: InputDecoration(
+                              labelText: '新しいパスワード',
+                              labelStyle: GoogleFonts.notoSansJp(),
+                            ),
+                            style: GoogleFonts.notoSansJp(),
                             obscureText: true,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -155,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           SizedBox(height: 20),
                           ElevatedButton(
                             onPressed: _updateUserProfile,
-                            child: Text('更新'),
+                            child: Text('更新', style: GoogleFonts.notoSansJp()),
                           ),
                         ],
                       ),
@@ -163,17 +179,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("ユーザー名: ${_usernameController.text}", style: TextStyle(fontSize: 18)),
+                        Text("ユーザー名: ${_usernameController.text}",
+                            style: GoogleFonts.notoSansJp(fontSize: 18)),
                         SizedBox(height: 10),
-                        Text("メールアドレス: ${_emailController.text}", style: TextStyle(fontSize: 18)),
+                        Text("メールアドレス: ${_emailController.text}",
+                            style: GoogleFonts.notoSansJp(fontSize: 18)),
                         SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              _isEditing = true; // 編集モードに切り替え
+                              _isEditing = true;
                             });
                           },
-                          child: Text('修正'),
+                          child: Text('修正', style: GoogleFonts.notoSansJp()),
                         ),
                       ],
                     ),
