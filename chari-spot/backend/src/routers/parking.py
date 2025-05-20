@@ -40,9 +40,9 @@ def get_all_parkings(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 @router.get("/owned", response_model=list[schemas.ParkingResponse])
 def get_parking_by_owner(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     parkings = crud.get_parking_by_owner(db, user.id)
-    '''if len(parkings) == 0:
-        raise HTTPException(status_code=404, detail="駐輪場が見つかりません")'''
+
     
+    # 駐輪場がない場合でも空のリストを返す
     response_data = []
     for parking in parkings:
         response_data.append(schemas.ParkingResponse.model_validate(parking))
