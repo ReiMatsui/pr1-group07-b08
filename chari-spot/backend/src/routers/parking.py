@@ -23,7 +23,7 @@ def create_parking(
     db: Session = Depends(get_db),
     user: models.User = Depends(get_current_user)
 ):
-    return crud.create_parking(db, parking)
+    return crud.create_parking(db, parking, user.id)
 
 
 # 駐輪場一覧を取得（UTF-8 明示）
@@ -40,6 +40,7 @@ def get_all_parkings(skip: int = 0, limit: int = 100, db: Session = Depends(get_
 @router.get("/owned", response_model=list[schemas.ParkingResponse])
 def get_parking_by_owner(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     parkings = crud.get_parking_by_owner(db, user.id)
+
     
     # 駐輪場がない場合でも空のリストを返す
     response_data = []
@@ -59,16 +60,34 @@ def get_parking_detail(parking_id: int, db: Session = Depends(get_db)):
 
 # 駐輪場情報の更新
 @router.put("/update", response_model=schemas.ParkingResponse)
-def update_parking(slot: schemas.ParkingUpdate, db: Session = Depends(get_db)):
+def update_parking(
+    slot: schemas.ParkingUpdate,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    existing = crud.get_parking(db, slot.id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Slot not found.")
+    if existing.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="Not allowed to update this parking.")
     return crud.update_slot(db, slot)
+
 
 
 # 駐輪場の削除
 @router.delete("/delete/{id}")
-def delete_parking(id: int, db: Session = Depends(get_db)):
-    flag = crud.delete_slot(db, id)
-    if not flag:
+def delete_parking(
+    id: int,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(get_current_user)
+):
+    parking = crud.get_parking(db, id)
+    if not parking:
         raise HTTPException(status_code=404, detail="Slot not found.")
+    if parking.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="Not allowed to delete this parking.")
+    
+    flag = crud.delete_slot(db, id)
     return JSONResponse(
         content={"message": "Slot deleted successfully."},
         media_type="application/json; charset=utf-8"
