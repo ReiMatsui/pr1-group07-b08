@@ -12,6 +12,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final int userId = 1; // ユーザーIDは固定
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -64,6 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_formKey.currentState!.validate()) {
       final url = Uri.parse('http://localhost:8000/user/update');
       final requestBody = {
+        'id': userId,
         'username': _usernameController.text,
         'email': _emailController.text,
         'password': _passwordController.text,

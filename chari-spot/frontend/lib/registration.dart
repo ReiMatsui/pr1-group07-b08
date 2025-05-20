@@ -63,6 +63,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'longitude': longitude,
       'avail_slots': capacity, // 初期値として全て空き
       'total_slots': capacity,
+      'owner_id': 1, // ユーザーIDは固定
     };
 
     try {
