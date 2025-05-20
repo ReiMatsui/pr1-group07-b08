@@ -85,7 +85,7 @@ flutter run
 ### カメラシステム
 1. ディレクトリ移動
 ```
-cd chari-spo
+cd chari-spot/camera_system
 ```
 
 2. ライブラリのインストール

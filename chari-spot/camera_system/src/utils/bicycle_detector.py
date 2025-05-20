@@ -4,6 +4,9 @@ from typing import Tuple, List
 import threading
 import queue
 import numpy as np
+from loguru import logger
+import subprocess
+import numpy
 
 
 class BicycleDetector:
@@ -17,10 +20,13 @@ class BicycleDetector:
         self.bicycle_frame_queue = queue.Queue(maxsize=10)
         self.bicycle_result_queue = queue.Queue(maxsize=10) 
         
+        self.if_announce_done = False
+        
         self.running = threading.Event()
         self.bicycle_detection_thread = threading.Thread(target=self.detect)
         self.bicycle_detection_thread.daemon = True
         self.running.set()
+        
         
     def start(self):
         """
@@ -46,6 +52,15 @@ class BicycleDetector:
             return self.bicycle_result_queue.get(timeout=0.1)
         return None
             
+    def announce_bicycle_detected(self):
+        """
+        自転車が検出されたときに音声でアナウンスする
+        """
+        try:
+            subprocess.run(["say", "-v", "Kyoko", "自転車が検出されました。ちゅうりんする場合は、5分以内にQRコードから支払いを行なってください。5分を過ぎても支払いが行われずにちゅうりんしている場合は録画を開始します。"])
+            
+        except Exception as e:
+            logger.error(f"音声アナウンスに失敗しました: {e}")
             
     def detect(self):
         """
@@ -55,6 +70,14 @@ class BicycleDetector:
             try:
                 # キューからフレームを取得
                 frame = self.bicycle_frame_queue.get(timeout=0.1)
+                if not isinstance(frame, numpy.ndarray):
+                    logger.error(f"frameの型が不正です: {type(frame)}")
+                    continue
+                if frame.dtype != numpy.uint8:
+                    frame = frame.astype(numpy.uint8)
+                if frame.ndim != 3 or frame.shape[2] != 3:
+                    logger.error(f"frameの形状が不正です: {frame.shape}")
+                    continue
                 results = self.model(frame)[0]
                 bboxes = []
                 bicycle_found = False
@@ -71,7 +94,11 @@ class BicycleDetector:
 
                 # バウンディングボックスを描画
                 self.draw_boxes(frame, bboxes)
-
+                if bicycle_found and not self.if_announce_done:
+                    # 自転車が検出された場合、音声アナウンスを行う
+                    threading.Thread(target=self.announce_bicycle_detected).start()
+                    self.if_announce_done = True
+                    
                 # 結果をキューに追加（描画済みフレームを含む）
                 self.bicycle_result_queue.put((bicycle_found, bboxes, frame))
 
