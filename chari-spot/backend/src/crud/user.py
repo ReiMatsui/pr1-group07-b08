@@ -32,8 +32,8 @@ def list_users(db: Session, skip: int = 0, limit: int = 100) -> List[user.User]:
     """Return a slice of users for paging."""
     return db.query(user.User).offset(skip).limit(limit).all()
 
-def update_user(db: Session, userUpdate: schemas.UserUpdate, user_id: int) -> Optional[user.User]:
-    user_obj = get_user(db, user_id)
+def update_user(db: Session, userUpdate: schemas.UserUpdate) -> Optional[user.User]:
+    user_obj = get_user(db, userUpdate.id)
     if not user_obj:
         return None
 

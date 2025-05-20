@@ -49,12 +49,12 @@ def get_user(db: Session = Depends(get_db), user: models.User = Depends(auth.get
 def update_user(
     user_up: user.UserUpdate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    user: models.User = Depends(auth.get_current_user)
 ):
     # create a new UserUpdate object with the current user's ID
-    user_update_data = user.UserUpdate(**user_up.model_dump())
-    return crud.update_user(db, user_update_data, user_id=current_user.id)
-
+    user_up.id = user.id
+    user_up.password = auth.get_password_hash(user_up.password)
+    return crud.update_user(db, user_up)
 
 
 @router.delete("/user/delete")
