@@ -17,6 +17,8 @@ bcrypt = "3.2.2"
 pytest = "^8.3.5"
 python-jose = "^3.4.0"
 python-multipart = "^0.0.20"
+paypayopa = "^1.7"
+qrcode = {extras = ["pil"], version = "^8.2"}
 
 
 [build-system]

@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import user
 from routers import parking
 from routers import payment
+from routers import qr
 from models import user as user_model
 from models import parking as parking_model
 from sqlalchemy.orm import Session
@@ -36,6 +37,8 @@ app.include_router(parking.router)
 
 # include the payment router
 app.include_router(payment.router)
+
+app.include_router(qr.router)
 
 @app.get("/api/hello")
 def read_root():
