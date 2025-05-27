@@ -1,13 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
-class PaymentCreate(BaseModel):
+# class PaymentCreate(BaseModel):
+#     spot_id: int
+#     slot_id: int
+#     paid: bool = False
+
+class PaymentResponse(BaseModel):
+    id: int
     spot_id: int
     slot_id: int
-    paid: bool = False
+    parked: bool
+    paid: bool
 
-class PaymentOut(PaymentCreate):
-    id: int
-    user_id: int
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes = True)
