@@ -29,6 +29,22 @@ def register_user(user: user.UserCreate, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/user/verify", response_model=None)
+def verify_user(
+    pwd: str,
+    db: Session = Depends(get_db),
+    user: models.User = Depends(auth.get_current_user)
+):
+    user_obj = crud.get_user(db, user.id)  # Ensure user exists
+
+    res = auth.verify_password(pwd, user_obj.password)
+
+    return JSONResponse(
+        content={"exists": res},
+        media_type="application/json; charset=utf-8"
+    )
+
+
 @router.post("/user/login", response_model=user.Token)
 async def login_for_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
