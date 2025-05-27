@@ -254,7 +254,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
           },
           child: Icon(
             Icons.location_pin,
-            color: isEmpty ? Colors.red.withOpacity(0.8) : Colors.red,
+            color: isEmpty ? Colors.grey.withOpacity(0.8) : Colors.red,
             size: 60,
           ),
         ),
