@@ -25,10 +25,19 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _getCurrentLocation() async {
     try {
       // 現在地の許可をリクエスト
-      LocationPermission permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.deniedForever) {
+        // 設定画面への遷移を促す
+        await Geolocator.openAppSettings();
         throw Exception('位置情報の許可が必要です');
+      }
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          throw Exception('位置情報の許可が必要です');
+        }
       }
 
       // 現在地を取得
