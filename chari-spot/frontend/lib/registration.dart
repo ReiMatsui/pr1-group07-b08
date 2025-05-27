@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:latlong2/latlong.dart';
 import 'map_screen.dart';
+import 'parking_update.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String token;
@@ -244,6 +245,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     return ListTile(
                       title: Text(parking['name'], style: GoogleFonts.notoSansJp()),
                       subtitle: Text(parking['address'], style: GoogleFonts.notoSansJp()),
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ParkingUpdateScreen(
+                              parkingId: parking['id'],
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                        if (result == true) {
+                          _fetchOwnedParkings(); // 更新後にリストを再取得
+                        }
+                      },
                     );
                   },
                 ),
