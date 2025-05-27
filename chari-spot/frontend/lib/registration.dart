@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
+import 'package:latlong2/latlong.dart';
+import 'map_screen.dart';
+import 'parking_update.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  final String token; // トークンを受け取る
+  final String token;
 
   RegistrationScreen({required this.token});
 
@@ -32,7 +36,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       final response = await http.get(
         url,
         headers: {
-          'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+          'Authorization': 'Bearer ${widget.token}',
         },
       );
 
@@ -61,9 +65,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       'address': address,
       'latitude': latitude,
       'longitude': longitude,
-      'avail_slots': capacity, // 初期値として全て空き
+      'avail_slots': capacity,
       'total_slots': capacity,
-      'owner_id': 1, // ユーザーIDは固定
+      'owner_id': 1,
     };
 
     try {
@@ -71,17 +75,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${widget.token}', // トークンをヘッダーに追加
+          'Authorization': 'Bearer ${widget.token}',
         },
         body: json.encode(requestBody),
       );
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('登録が成功しました')),
+          SnackBar(content: Text('登録が成功しました', style: GoogleFonts.notoSansJp())),
         );
-        _fetchOwnedParkings(); // リストを更新
-        Navigator.pop(context); // モーダルを閉じる
+        _fetchOwnedParkings();
+        Navigator.pop(context);
       } else {
         final errorData = json.decode(response.body);
         _showError("登録に失敗しました: ${errorData['detail']}");
@@ -92,7 +96,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message, style: GoogleFonts.notoSansJp())),
+    );
   }
 
   void _showRegistrationForm() {
@@ -103,9 +109,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         final _formKey = GlobalKey<FormState>();
         final TextEditingController _nameController = TextEditingController();
         final TextEditingController _addressController = TextEditingController();
-        final TextEditingController _latitudeController = TextEditingController();
-        final TextEditingController _longitudeController = TextEditingController();
         final TextEditingController _capacityController = TextEditingController();
+        LatLng? _selectedLocation;
 
         return Padding(
           padding: EdgeInsets.only(
@@ -139,27 +144,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _latitudeController,
-                  decoration: InputDecoration(labelText: '緯度'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '緯度を入力してください';
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MapScreen(
+                          initialLocation: LatLng(35.6895, 139.6917), // 初期位置（例: 東京）
+                        ),
+                      ),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        _selectedLocation = result;
+                      });
                     }
-                    return null;
                   },
-                ),
-                TextFormField(
-                  controller: _longitudeController,
-                  decoration: InputDecoration(labelText: '経度'),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return '経度を入力してください';
-                    }
-                    return null;
-                  },
+                  child: Text(_selectedLocation == null
+                      ? '地図で位置を選択'
+                      : '選択済み: ${_selectedLocation!.latitude}, ${_selectedLocation!.longitude}'),
                 ),
                 TextFormField(
                   controller: _capacityController,
@@ -175,17 +179,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    if (_formKey.currentState!.validate() && _selectedLocation != null) {
                       _submitForm(
                         _nameController.text,
                         _addressController.text,
-                        double.parse(_latitudeController.text),
-                        double.parse(_longitudeController.text),
+                        _selectedLocation!.latitude,
+                        _selectedLocation!.longitude,
                         int.parse(_capacityController.text),
                       );
+                    } else if (_selectedLocation == null) {
+                      _showError('地図で位置を選択してください');
                     }
                   },
-                  child: Text('登録'),
+                  child: Text('登録', style: GoogleFonts.notoSansJp()),
                 ),
               ],
             ),
@@ -195,11 +201,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
+  Widget _buildTextField(String label, TextEditingController controller, {bool isNumber = false}) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      style: GoogleFonts.notoSansJp(),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '$label を入力してください';
+        }
+        return null;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('駐輪場リスト'),
+        title: Text('駐輪場リスト', style: GoogleFonts.notoSansJp()),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -208,14 +229,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'まだ駐輪場が登録されていません。',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      Text('まだ駐輪場が登録されていません。', style: GoogleFonts.notoSansJp(fontSize: 18)),
                       SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _showRegistrationForm,
-                        child: Text('新規登録はこちら'),
+                        child: Text('新規登録はこちら', style: GoogleFonts.notoSansJp()),
                       ),
                     ],
                   ),
@@ -225,8 +243,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   itemBuilder: (context, index) {
                     final parking = _parkingList[index];
                     return ListTile(
-                      title: Text(parking['name']),
-                      subtitle: Text(parking['address']),
+                      title: Text(parking['name'], style: GoogleFonts.notoSansJp()),
+                      subtitle: Text(parking['address'], style: GoogleFonts.notoSansJp()),
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ParkingUpdateScreen(
+                              parkingId: parking['id'],
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                        if (result == true) {
+                          _fetchOwnedParkings(); // 更新後にリストを再取得
+                        }
+                      },
                     );
                   },
                 ),
@@ -235,7 +267,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               onPressed: _showRegistrationForm,
               child: Icon(Icons.add),
             )
-          : null, // 駐輪場がない場合はFABを非表示
+          : null,
     );
   }
 }
