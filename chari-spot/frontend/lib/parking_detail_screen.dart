@@ -15,7 +15,7 @@ class ParkingDetailScreen extends StatelessWidget {
           spot.name,
           style: GoogleFonts.notoSansJp(fontSize: 20),
         ),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
