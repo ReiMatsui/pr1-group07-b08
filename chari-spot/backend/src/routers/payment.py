@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.post("/park", response_model=schemas.PaymentResponse)
+@router.post("/", response_model=schemas.PaymentResponse)
 def update(
     spot_id: int = Query(..., description="Spot ID"),
     slot_id: int = Query(..., description="Slot ID"),
@@ -30,6 +30,8 @@ def update(
             paid=False
         )
         res = crud.create_payment(db, paymentCreate)
+    elif parked is None and paid is None:
+        raise HTTPException(status_code=400, detail="Either 'parked' or 'paid' must be provided")
     else:
         res = crud.update_payment(db, spot_id=spot_id, slot_id=slot_id, parked=parked, paid=paid)
     
