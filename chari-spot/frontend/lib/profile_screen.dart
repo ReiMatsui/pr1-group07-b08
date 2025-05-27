@@ -110,8 +110,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('プロフィール', style: GoogleFonts.notoSansJp()),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.orange,
+        title: Text(
+          'プロフィール',
+          style: GoogleFonts.notoSansJp(
+            color: Colors.white,          // 真っ白に
+            fontWeight: FontWeight.bold, // 太字に
+            fontSize: 20,                // 読みやすく少し大きめに（任意）
+          ),
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

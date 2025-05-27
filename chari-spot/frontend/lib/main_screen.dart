@@ -40,7 +40,7 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.teal,
+        selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -172,11 +172,22 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
             right: 40,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                shape: StadiumBorder(),
+                backgroundColor: Colors.orange,
+                shape: const StadiumBorder(),
               ),
-              icon: Icon(Icons.refresh),
-              label: Text("このエリアで検索"),
+              icon: Icon(
+                Icons.refresh,
+                color: Colors.white, // アイコンを白に
+                size: 28,             // 太く見せるためにサイズを少し大きく
+              ),
+              label: Text(
+                "このエリアで検索",
+                style: const TextStyle(
+                  color: Colors.white,          // テキストも白に
+                  fontWeight: FontWeight.bold,  // 太字
+                  fontSize: 16,                 // 読みやすく
+                ),
+              ),
               onPressed: _loadParkingSpots,
             ),
           ),
@@ -215,7 +226,7 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.send, color: Colors.teal),
+            icon: Icon(Icons.send, color: Colors.orange),
             onPressed: _searchLocation,
           ),
         ],
@@ -225,6 +236,8 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
 
   List<Marker> _createMarkers(BuildContext context) {
     List<Marker> markers = _parkingSpots.map((spot) {
+      final bool isEmpty = spot.availSlots == 0;
+
       return Marker(
         width: 60.0,
         height: 60.0,
@@ -239,7 +252,11 @@ class _ParkingMapScreenState extends State<ParkingMapScreen> {
               ),
             );
           },
-          child: Icon(Icons.location_pin, color: Colors.red, size: 60),
+          child: Icon(
+            Icons.location_pin,
+            color: isEmpty ? Colors.red.withOpacity(0.8) : Colors.red,
+            size: 60,
+          ),
         ),
       );
     }).toList();
@@ -315,7 +332,7 @@ class ParkingDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(spot.name), backgroundColor: Colors.teal),
+      appBar: AppBar(title: Text(spot.name), backgroundColor: Colors.orange),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: DefaultTextStyle(
