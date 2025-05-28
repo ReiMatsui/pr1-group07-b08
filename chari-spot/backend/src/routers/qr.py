@@ -12,6 +12,8 @@ router = APIRouter(
 )
 
 @router.get("/trigger")
-async def trigger(req: Request):
-    # 好きな処理を書く（DB 更新・バッチ起動など）
-    return "成功！"
+async def qr_trigger(request: Request):
+    spot_id = request.query_params.get("spot_id")
+    slot_id = request.query_params.get("slot_id")
+    # ここでspot_idやslot_idを使った処理が可能
+    return {"spot_id": spot_id, "slot_id": slot_id}
