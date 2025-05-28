@@ -18,7 +18,7 @@ class App(BaseModel):
     model_config = {
         "arbitrary_types_allowed": True
     }
-    camera_no: int = Field(default=0, description="使用するカメラの番号")
+    camera_no: int = Field(default=1, description="使用するカメラの番号")
     video_name: str = Field(default="output.mp4", description="保存するビデオの名前")
     session_dir: Path = None  # セッションディレクトリを保持
     camera_manager: CameraManager = None
