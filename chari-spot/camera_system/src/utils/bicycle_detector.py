@@ -8,7 +8,8 @@ from loguru import logger
 import subprocess
 from collections import defaultdict
 import time
-
+import httpx
+from urllib.parse import urlencode
 
 class BicycleDetector:
     """
@@ -25,7 +26,8 @@ class BicycleDetector:
         confidence_threshold: float = 0.3,
         detection_threshold: float = 30.0,        # [秒] スロット内滞在判定
         payment_grace_period: float = 60.0,       # [秒] 支払い猶予
-        slot_gap_px: int = 20                     # スロット間ギャップ幅
+        slot_gap_px: int = 20,                   # スロット間ギャップ幅
+        payment_api_base: str = "http://localhost:8000/payments/public",
     ):
         # ---- YOLO ----------------------------------------------------- #
         self.model = YOLO(model_path)
@@ -65,6 +67,12 @@ class BicycleDetector:
         self.announcement_worker = threading.Thread(
             target=self._announcement_loop, daemon=True
         )
+        
+        self.payment_api_base = payment_api_base
+        self.payment_poll_interval = 5.0      # [秒] ポーリング周期
+        self.payment_poll_worker = threading.Thread(
+            target=self._payment_poll_loop, daemon=True
+        )
 
     # ------------------------------------------------------------------ #
     # 公開 API
@@ -73,6 +81,7 @@ class BicycleDetector:
         """検出スレッドと TTS ワーカーを開始"""
         self.bicycle_detection_thread.start()
         self.announcement_worker.start()
+        self.payment_poll_worker.start()
 
     def put_to_queue(self, frame: np.ndarray):
         """カメラフレームを検出キューへ投入"""
@@ -285,6 +294,37 @@ class BicycleDetector:
             cv2.line(frame, (x0, 0), (x0, h), (0, 255, 0), 1)
             cv2.line(frame, (x0 + g, 0), (x0 + g, h), (0, 255, 0), 1)
 
+    # ----------------------- 支払い確認ループ ------------------------
+    def _payment_poll_loop(self):
+        """
+        ① self.announced_slots（滞在判定＆案内済み）を走査  
+        ② サーバーの paid 状態をチェック  
+        ③ true なら mark_payment_completed() を呼ぶ
+        """
+        client = httpx.Client(timeout=3.0)
+        while self.running.is_set():
+            # 監視対象スロットは “案内済み & まだ支払い未完了”
+            target_slots = [
+                s for s in self.announced_slots if s not in self.paid_slots
+            ]
+            for slot in target_slots:
+                params = urlencode({"spot_id": 1, "slot_id": slot})
+                url = f"{self.payment_api_base}?{params}"
+                try:
+                    r = client.get(url)
+                    if r.status_code == 200:
+                        data = r.json()  # {"paid": true / false}
+                        if data.get("paid") is True:
+                            self.mark_payment_completed(slot)
+                    elif r.status_code == 404:
+                        logger.debug(f"slot{slot}: まだ DB にレコードなし")
+                    else:
+                        logger.warning(f"slot{slot}: API error {r.status_code}: {r.text}")
+                except httpx.RequestError as e:
+                    logger.error(f"API request failed: {e}")
+            # 次の周回までスリープ
+            time.sleep(self.payment_poll_interval)
+        client.close()
     # ------------------------------------------------------------------ #
     # スロット状態リセット
     # ------------------------------------------------------------------ #
