@@ -24,7 +24,7 @@ class BicycleDetector:
         self,
         model_path: str = "yolov8n.pt",
         confidence_threshold: float = 0.3,
-        detection_threshold: float = 30.0,        # [秒] スロット内滞在判定
+        detection_threshold: float = 15.0,        # [秒] スロット内滞在判定
         payment_grace_period: float = 60.0,       # [秒] 支払い猶予
         slot_gap_px: int = 20,                   # スロット間ギャップ幅
         payment_api_base: str = "http://localhost:8000/payments/public",
@@ -41,6 +41,7 @@ class BicycleDetector:
         self.detection_threshold = detection_threshold
         self.detect_started: dict[int, float] = {}      # slot -> first_detect_time
         self.announced_slots: set[int] = set()          # 検出案内済みスロット
+        self.announced_paid_slots: set[int] = set()
 
         self.payment_grace_period = payment_grace_period
         self.paid_slots: set[int] = set()               # 支払い完了スロット
@@ -48,7 +49,7 @@ class BicycleDetector:
 
         # ---- 検出ロスト判定 ------------------------------------------ #
         self.lost_frames = defaultdict(int)
-        self.lost_threshold = 300                      # 連続ロストでリセット
+        self.lost_threshold = 3000000000000                      # 連続ロストでリセット
 
         # ---- スロット描画関連 ---------------------------------------- #
         self.slot_gap_px = slot_gap_px
@@ -100,10 +101,21 @@ class BicycleDetector:
     def mark_payment_completed(self, slot_no: int):
         """QR 決済完了を外部から通知"""
         self.paid_slots.add(slot_no)
+        # 猶予タイマーを停止
         t = self.payment_timers.pop(slot_no, None)
         if t and t.is_alive():
             t.cancel()
+
         logger.info(f"slot{slot_no}: 支払い完了を受信")
+
+        # まだアナウンスしていなければ読上げ
+        if slot_no not in self.announced_paid_slots:
+            threading.Thread(
+                target=self.announce_payment_completed,
+                args=(slot_no,),
+                daemon=True,
+            ).start()
+            self.announced_paid_slots.add(slot_no)
 
     def clean_up(self):
         """全スレッド停止・キュークリア"""
@@ -182,6 +194,13 @@ class BicycleDetector:
         msg = (
             f"スロット{slot_no}で支払いが行われていません。"
             "ただちに支払いを行ってください。録画を開始します。"
+        )
+        self._enqueue_tts(msg)
+
+    def announce_payment_completed(self, slot_no: int):
+        msg = (
+            f"スロット{slot_no}のお支払いを確認しました。"
+            "ご利用ありがとうございます。"
         )
         self._enqueue_tts(msg)
 
@@ -331,6 +350,7 @@ class BicycleDetector:
     def reset_slot(self, slot_no: int):
         self.detect_started.pop(slot_no, None)
         self.announced_slots.discard(slot_no)
+        self.announced_paid_slots.discard(slot_no)
         self.paid_slots.discard(slot_no)
         t = self.payment_timers.pop(slot_no, None)
         if t and t.is_alive():
