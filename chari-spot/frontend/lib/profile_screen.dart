@@ -106,6 +106,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<bool> _verifyPassword(String password) async {
+    final url = Uri.parse('http://localhost:8000/user/verify?pwd=$password');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true; // パスワードが正しい
+      } else {
+        final errorData = json.decode(response.body);
+        _showError("パスワードの確認に失敗しました: ${errorData['detail']}");
+        return false;
+      }
+    } catch (e) {
+      _showError("通信エラー: $e");
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -193,10 +217,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: GoogleFonts.notoSansJp(fontSize: 18)),
                         SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isEditing = true;
-                            });
+                          onPressed: () async {
+                            final passwordController = TextEditingController();
+
+                            // パスワード入力ダイアログを表示
+                            final result = await showDialog<bool>(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text('パスワード確認', style: GoogleFonts.notoSansJp()),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('現在のパスワードを入力してください', style: GoogleFonts.notoSansJp()),
+                                      SizedBox(height: 10),
+                                      TextField(
+                                        controller: passwordController,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                          labelText: 'パスワード',
+                                          labelStyle: GoogleFonts.notoSansJp(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false), // キャンセル
+                                      child: Text('キャンセル', style: GoogleFonts.notoSansJp()),
+                                    ),
+                                    TextButton(
+                                      onPressed: () async {
+                                        final isValid = await _verifyPassword(passwordController.text);
+                                        Navigator.pop(context, isValid); // 検証結果を返す
+                                      },
+                                      child: Text('確認', style: GoogleFonts.notoSansJp()),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            // パスワードが正しい場合のみ修正画面に遷移
+                            if (result == true) {
+                              setState(() {
+                                _isEditing = true;
+                              });
+                            }
                           },
                           child: Text('修正', style: GoogleFonts.notoSansJp()),
                         ),
