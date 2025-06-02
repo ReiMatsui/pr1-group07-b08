@@ -10,11 +10,10 @@ from models import payment
 router = APIRouter(
     prefix="/payments",
     tags=["payments"],
-    dependencies=[Depends(get_current_user)]
 )
 
 
-@router.post("/", response_model=schemas.PaymentResponse)
+@router.post("/", response_model=schemas.PaymentResponse, dependencies=[Depends(get_current_user)])
 def update(
     spot_id: int = Query(..., description="Spot ID"),
     slot_id: int = Query(..., description="Slot ID"),
@@ -38,9 +37,32 @@ def update(
     response = schemas.PaymentResponse.model_validate(res)
     return response
 
+@router.post("/public", response_model=schemas.PaymentResponse)
+def public_update(
+    spot_id: int = Query(..., description="Spot ID"),
+    slot_id: int = Query(..., description="Slot ID"),
+    parked: Optional[bool] = Query(None, description="Parking status"),
+    paid: Optional[bool] = Query(None, description="Payment status"),
+    db: Session = Depends(get_db),
+):
+    if crud.get_payment_by_spot_and_slot(db, spot_id, slot_id) is None:
+        paymentCreate = payment.Payment(
+            spot_id=spot_id,
+            slot_id=slot_id,
+            parked=True,
+            paid=False
+        )
+        res = crud.create_payment(db, paymentCreate)
+    elif parked is None and paid is None:
+        raise HTTPException(status_code=400, detail="Either 'parked' or 'paid' must be provided")
+    else:
+        res = crud.update_payment(db, spot_id=spot_id, slot_id=slot_id, parked=parked, paid=paid)
+    
+    response = schemas.PaymentResponse.model_validate(res)
+    return response
 
 # url/?spot_id=1&slot_id=2
-@router.get("/", response_model=None)
+@router.get("/", response_model=None, dependencies=[Depends(get_current_user)])
 def get_payment_by_spot_and_slot(
     spot_id: int = Query(..., description="Spot ID"),
     slot_id: int = Query(..., description="Slot ID"),
@@ -51,3 +73,14 @@ def get_payment_by_spot_and_slot(
         raise HTTPException(status_code=404, detail="Data not found")
     
     return payment.paid
+
+@router.get("/public", response_model=None)
+def public_get_payment_by_spot_and_slot(
+    spot_id: int = Query(..., description="Spot ID"),
+    slot_id: int = Query(..., description="Slot ID"),
+    db: Session = Depends(get_db),
+):
+    payment = crud.get_payment_by_spot_and_slot(db, spot_id, slot_id)
+    if not payment:
+        raise HTTPException(status_code=404, detail="Data not found")
+    return {"paid": payment.paid}

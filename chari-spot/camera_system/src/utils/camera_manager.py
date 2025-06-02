@@ -28,7 +28,8 @@ class CameraManager:
         self.ret, self.frame = self.capture.read()
         
         if self.ret:
-            return cv2.flip(self.frame, 1)
+            return self.frame
+            # return cv2.flip(self.frame, 1)
         return None
     
     def imshow(self, window_name: str, image: numpy.ndarray):
