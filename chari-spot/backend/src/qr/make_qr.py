@@ -1,7 +1,7 @@
 import qrcode
 
-SERVER_IP = "172.20.10.7"
-SERVER_IP = "192.168.0.20"
+SERVER_IP = "172.20.10.9"
+# SERVER_IP = "192.168.0.20"
 SPOT_ID = 1
 SLOT_ID = 1
 
