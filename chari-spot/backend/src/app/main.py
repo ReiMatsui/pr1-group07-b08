@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import user
 from routers import parking
+from routers import payment
 from models import user as user_model
 from models import parking as parking_model
 from sqlalchemy.orm import Session
@@ -33,24 +34,9 @@ app.include_router(user.router)
 # Include the parking router
 app.include_router(parking.router)
 
+# include the payment router
+app.include_router(payment.router)
+
 @app.get("/api/hello")
 def read_root():
     return {"message": "Hello from FastAPI!"}
-
-
-@app.get("/parkings")
-def read_parkings():
-    db: Session = SessionLocal()
-    parkings = db.query(parking_model).all()
-    result = []
-    for parking in parkings:
-        result.append({
-            "id": parking.id,
-            "name": parking.name,
-            "address": parking.address,
-            "latitude": parking.latitude,
-            "longitude": parking.longitude,
-            "total_slots": parking.total_slots,
-            "avail_slots": parking.avail_slots,
-        })
-    return result

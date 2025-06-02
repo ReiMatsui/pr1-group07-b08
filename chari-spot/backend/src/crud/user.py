@@ -2,12 +2,14 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from models import user
 from schemas import user as schemas
+from app import auth
 
 def create_user(db: Session, userCreate: schemas.UserCreate):
+    hashed_password = auth.get_password_hash(userCreate.password)
     db_user = user.User(
         username=userCreate.username,
         email=userCreate.email,
-        password=userCreate.password
+        password=hashed_password,
     )
     db.add(db_user)
     db.commit()
@@ -31,18 +33,18 @@ def list_users(db: Session, skip: int = 0, limit: int = 100) -> List[user.User]:
     return db.query(user.User).offset(skip).limit(limit).all()
 
 def update_user(db: Session, userUpdate: schemas.UserUpdate) -> Optional[user.User]:
-    """Update fields on a User. Returns the updated User, or None if not found."""
-    user = get_user(db, userUpdate.id)
-    if not user:
+    user_obj = get_user(db, userUpdate.id)
+    if not user_obj:
         return None
-    
-    update_data = userUpdate.model_dump(exclude_unset=True)  
+
+    update_data = userUpdate.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(user, key, value)
-    
+        setattr(user_obj, key, value)
+
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(user_obj)
+    return user_obj
+
 
 def delete_user(db: Session, user_id: int) -> bool:
     """Delete a User by ID. Returns True if deleted, False if not found."""
