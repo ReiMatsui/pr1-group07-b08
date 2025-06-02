@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'registration.dart';
 import 'profile_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
   final String token; // トークンを受け取る
@@ -332,21 +333,41 @@ class ParkingDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(spot.name), backgroundColor: Colors.orange),
+      appBar: AppBar(
+        title: Text(spot.name),
+        backgroundColor: Colors.orange,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: DefaultTextStyle(
-          style: TextStyle(fontSize: 16, color: Colors.white),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("🅿️ 駐輪場名: ${spot.name}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              SizedBox(height: 12),
-              Text("📍 住所: ${spot.address}"),
-              SizedBox(height: 12),
-              Text("🚲 空き台数: ${spot.availSlots} / ${spot.totalSlots}"),
-            ],
-          ),
+        child: Column(
+          children: [
+            // 上部の駐輪場情報
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("🅿️ 駐輪場名: ${spot.name}",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                SizedBox(height: 12),
+                Text("📍 住所: ${spot.address}"),
+                SizedBox(height: 12),
+                Text("🚲 空き台数: ${spot.availSlots} / ${spot.totalSlots}"),
+              ],
+            ),
+            Spacer(),
+            // 中央に目立たせるメッセージ
+            Center(
+              child: Text(
+                '駐輪料金は100円です。\n駐輪後、直ちにQRコードで支払いを行なってください',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.notoSansJp(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.redAccent,
+                ),
+              ),
+            ),
+            Spacer(), // 画面中央に配置されるようスペース調整
+          ],
         ),
       ),
     );
